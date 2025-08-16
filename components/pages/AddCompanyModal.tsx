@@ -60,6 +60,22 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onAd
   };
   // رسائل تحقق فورية
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [branchMsg, setBranchMsg] = useState<string>('');
+
+  const validateTab = (tabIndex: number) => {
+    const newErrors: {[key: string]: string} = {};
+    let ok = true;
+    if (tabIndex === 0) {
+      if (!company.name) { newErrors.name = 'اسم الشركة مطلوب'; ok = false; }
+      if (!company.logo) { newErrors.logo = 'شعار الشركة مطلوب'; ok = false; }
+    }
+    if (tabIndex === 1) {
+      if (!company.phone || !isValidEgyptianPhone(company.phone)) { newErrors.phone = 'رقم الهاتف غير صحيح'; ok = false; }
+      if (!company.email || !isValidEmail(company.email)) { newErrors.email = 'البريد الإلكتروني غير صحيح'; ok = false; }
+    }
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    return ok;
+  };
 
   const handleChange = (field: string, value: any) => {
     setCompany(prev => ({ ...prev, [field]: value }));
@@ -325,6 +341,15 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onAd
                       if (branch.name && branch.address && branch.governate) {
                         setBranches(prev => [...prev, branch]);
                         setBranch({ ...defaultBranch });
+                        setBranchMsg('تمت إضافة الفرع بنجاح');
+                        setTimeout(() => setBranchMsg(''), 2500);
+                      } else {
+                        // highlight required fields
+                        const bErr: {[key: string]: string} = {};
+                        if (!branch.name) bErr.branchName = 'اسم الفرع مطلوب';
+                        if (!branch.address) bErr.branchAddress = 'العنوان مطلوب';
+                        if (!branch.governate) bErr.branchGovernate = 'المحافظة مطلوبة';
+                        setErrors(prev => ({ ...prev, ...bErr }));
                       }
                     }}
                     type="button"
@@ -419,7 +444,11 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onAd
           )}
         </div>
         {/* أزرار التنقل والحفظ */}
-        <div className="mt-8 flex flex-row-reverse justify-between items-center gap-2">
+        <div className="mt-4">
+          {branchMsg && (
+            <div className="mb-3 text-sm text-green-600 font-semibold">{branchMsg}</div>
+          )}
+          <div className="mt-2 flex flex-row-reverse justify-between items-center gap-2">
           <button
             className="bg-gray-200 text-gray-700 px-4 py-1 rounded text-sm"
             style={{ fontWeight: 400 }}
@@ -427,6 +456,22 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onAd
           >
             إلغاء
           </button>
+          <div className="flex items-center gap-2">
+            <button
+              className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded text-sm"
+              onClick={() => { if (activeTab > 0) setActiveTab(activeTab - 1); }}
+              type="button"
+            >
+              السابق
+            </button>
+            <button
+              className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded text-sm"
+              onClick={() => { if (activeTab < TABS.length - 1) { if (validateTab(activeTab)) setActiveTab(activeTab + 1); } }}
+              type="button"
+            >
+              التالي
+            </button>
+          </div>
           <button
             className="bg-[#5bd4b0] text-white px-8 py-3 rounded-lg text-lg hover:bg-[#4bbd99] transition-all"
             style={{ fontWeight: 500 }}
@@ -458,6 +503,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onAd
           >
             حفظ الشركة
           </button>
+          </div>
         </div>
       </div>
     </Modal>
