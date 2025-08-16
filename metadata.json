@@ -1,0 +1,5 @@
+{
+  "name": "Tripoo Admin Dashboard",
+  "description": "An admin dashboard for managing trips, companies, bookings, and users for the Tripoo travel platform. It features comprehensive reporting, user role management, and system settings, all within a clean, fast, and user-friendly interface with dark mode support.",
+  "requestFramePermissions": []
+}
